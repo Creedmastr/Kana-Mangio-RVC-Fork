@@ -73,6 +73,7 @@ class Config:
     def device_config(self) -> tuple:
         if torch.cuda.is_available():
             i_device = int(self.device.split(":")[-1])
+           
             self.gpu_name = torch.cuda.get_device_name(i_device)
             if (
                 ("16" in self.gpu_name and "V100" not in self.gpu_name.upper())

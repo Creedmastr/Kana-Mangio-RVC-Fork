@@ -155,11 +155,11 @@ def vc_single(
     crepe_hop_length,
 ):  # spk_item, input_audio0, vc_transform0,f0_file,f0method0
     global tgt_sr, net_g, vc, hubert_model, version
-    print(sid, input_audio_path, f0_up_key, f0_file, f0_method, file_index, file_index2, index_rate, filter_radius, resample_sr, rms_mix_rate, protect, crepe_hop_length)
+    # print(sid, input_audio_path, f0_up_key, f0_file, f0_method, file_index, file_index2, index_rate, filter_radius, resample_sr, rms_mix_rate, protect, crepe_hop_length)
     if input_audio_path is None:
         return "You need to upload an audio", None
     f0_up_key = int(f0_up_key)
-    print(f"\n{input_audio_path}\n")
+    # print(f"\n{input_audio_path}\n")
     try:
         audio = load_audio(input_audio_path, 16000)
         audio_max = np.abs(audio).max() / 0.95
@@ -184,10 +184,11 @@ def vc_single(
         # file_big_npy = (
         #     file_big_npy.strip(" ").strip('"').strip("\n").strip('"').strip(" ")
         # )
+        
         audio_opt = vc.pipeline(
             hubert_model,
             net_g,
-            0,
+            sid,
             audio,
             input_audio_path,
             times,
@@ -1163,49 +1164,45 @@ def cli_split_command(com):
 def execute_generator_function(genObject):
     for _ in genObject: pass
 
-def cli_infer(com):
-    # get VC first
-    com = cli_split_command(com)
-    model_name = com[0]
-    source_audio_path = com[1]
-    output_file_name = com[2]
-    feature_index_path = com[3]
-    f0_file = None # Not Implemented Yet
-
-    # Get parameters for inference
-    speaker_id = int(com[4])
-    transposition = float(com[5])
-    f0_method = com[6]
-    crepe_hop_length = int(com[7])
-    harvest_median_filter = int(com[8])
-    resample = int(com[9])
-    mix = float(com[10])
-    feature_ratio = float(com[11])
-    protection_amnt = float(com[12])
-
+def cli_infer(
+    sid,
+    input_audio_path,
+    f0_up_key,
+    f0_file,
+    f0_method,
+    file_index,
+    file_index2,
+    # file_big_npy,
+    index_rate,
+    filter_radius,
+    resample_sr,
+    rms_mix_rate,
+    protect,
+    crepe_hop_length,
+):
     print("Mangio-RVC-Fork Infer-CLI: Starting the inference...")
-    vc_data = get_vc(model_name)
+    vc_data = get_vc(sid)
     print(vc_data)
     print("Mangio-RVC-Fork Infer-CLI: Performing inference...")
     conversion_data = vc_single(
-        speaker_id,
-        source_audio_path,
-        transposition,
+        sid,
+        input_audio_path,
+        f0_up_key,
         f0_file,
         f0_method,
-        feature_index_path,
-        feature_index_path,
-        feature_ratio,
-        harvest_median_filter,
-        resample,
-        mix,
-        protection_amnt,
+        file_index,
+        file_index2,
+        index_rate,
+        filter_radius,
+        resample_sr,
+        rms_mix_rate,
+        protect,
         crepe_hop_length,        
     )
     if "Success." in conversion_data[0]:
-        print("Mangio-RVC-Fork Infer-CLI: Inference succeeded. Writing to %s/%s..." % ('audio-outputs', output_file_name))
-        wavfile.write('%s/%s' % ('audio-outputs', output_file_name), conversion_data[1][0], conversion_data[1][1])
-        print("Mangio-RVC-Fork Infer-CLI: Finished! Saved output to %s/%s" % ('audio-outputs', output_file_name))
+        print("Mangio-RVC-Fork Infer-CLI: Inference succeeded. Writing to %s/%s..." % ('audio-outputs', "output.wav"))
+        wavfile.write('%s/%s' % ('audio-outputs', "output.wav"), conversion_data[1][0], conversion_data[1][1])
+        print("Mangio-RVC-Fork Infer-CLI: Finished! Saved output to %s/%s" % ('audio-outputs', "output.wav"))
     else:
         print("Mangio-RVC-Fork Infer-CLI: Inference failed. Here's the traceback: ")
         print(conversion_data[0])
@@ -2158,7 +2155,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
         # with gr.TabItem(i18n("点击查看交流、问题反馈群号")):
         #     gr.Markdown(value=i18n("xxxxx"))
 
-    if config.iscolab or config.paperspace: # Share gradio link for colab and paperspace (FORK FEATURE)
+    """if config.iscolab or config.paperspace: # Share gradio link for colab and paperspace (FORK FEATURE)
         app.queue(concurrency_count=511, max_size=1022).launch(share=True)
     else:
         app.queue(concurrency_count=511, max_size=1022).launch(
@@ -2166,6 +2163,6 @@ with gr.Blocks(theme=gr.themes.Soft()) as app:
             inbrowser=not config.noautoopen,
             server_port=config.listen_port,
             quiet=True,
-        )
+        )"""
 
 #endregion

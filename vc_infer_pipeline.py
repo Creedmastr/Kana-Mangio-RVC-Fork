@@ -510,7 +510,7 @@ class VC(object):
                 inp_f0 = np.array(inp_f0, dtype="float32")
             except:
                 traceback.print_exc()
-        sid = torch.tensor(sid, device=self.device).unsqueeze(0).long()
+        sid = torch.tensor(0, device=self.device).unsqueeze(0).long()
         pitch, pitchf = None, None
         if if_f0 == 1:
             pitch, pitchf = self.get_f0(
@@ -538,7 +538,7 @@ class VC(object):
                     self.vc(
                         model,
                         net_g,
-                        sid,
+                        0,
                         audio_pad[s : t + self.t_pad2 + self.window],
                         pitch[:, s // self.window : (t + self.t_pad2) // self.window],
                         pitchf[:, s // self.window : (t + self.t_pad2) // self.window],
